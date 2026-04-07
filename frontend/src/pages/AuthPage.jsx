@@ -47,7 +47,7 @@ export default function AuthPage({ mode }) {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <p className="eyebrow">Smart Campus Solution</p>
+        <p className="eyebrow">DIGIDoze</p>
         <h1>{isLogin ? "Welcome back" : "Create your account"}</h1>
         <p className="muted">
           Access smart printing, mobile dining, and role-based campus dashboards.
