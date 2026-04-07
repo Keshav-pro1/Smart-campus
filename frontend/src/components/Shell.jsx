@@ -8,7 +8,7 @@ const studentLinks = [
   { to: "/status", label: "Status" },
 ];
 
-const adminLinks = [{ to: "/admin", label: "Admin Dashboard" }];
+const adminLinks = [{ to: "/admin", label: "Printer Dashboard" }];
 const vendorLinks = [{ to: "/vendor", label: "Vendor Dashboard" }];
 
 export default function Shell({ title, children }) {

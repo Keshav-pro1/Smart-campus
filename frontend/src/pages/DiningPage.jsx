@@ -1,13 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../api";
+import PaymentGateway from "../components/PaymentGateway";
+import PaymentReceipt from "../components/PaymentReceipt";
 import Shell from "../components/Shell";
+import { useAuth } from "../context/AuthContext";
 
 export default function DiningPage() {
+  const { user } = useAuth();
   const [menu, setMenu] = useState([]);
   const [cart, setCart] = useState({});
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState("");
   const [latestOrder, setLatestOrder] = useState(null);
+  const [paymentPhase, setPaymentPhase] = useState("idle");
+  const [receipt, setReceipt] = useState(null);
 
   useEffect(() => {
     api.get("/dining/menu").then((response) => setMenu(response.data)).catch(() => {});
@@ -43,6 +49,12 @@ export default function DiningPage() {
     [cartItems]
   );
 
+  const formatDateTime = (value) =>
+    new Intl.DateTimeFormat("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(value);
+
   const handleOrder = async () => {
     if (!cartItems.length) {
       setError("Add at least one item to continue");
@@ -51,15 +63,36 @@ export default function DiningPage() {
 
     setPlacing(true);
     setError("");
+    setPaymentPhase("processing");
 
     try {
+      await new Promise((resolve) => setTimeout(resolve, 2400));
       const payload = {
         items: cartItems.map((item) => ({ id: item.id, quantity: item.quantity })),
       };
       const { data } = await api.post("/dining/orders", payload);
       setLatestOrder(data.order);
+      setReceipt({
+        heading: "Dining receipt generated",
+        amount: data.order.totalAmount,
+        transactionId: `TXN-DIN-${Date.now().toString().slice(-8)}`,
+        paymentFor: "Smart Dining prepaid order",
+        receiptLines: [
+          { label: "Order token", value: data.order.token },
+          { label: "Items", value: `${data.order.items.length} selected` },
+          { label: "Queue status", value: data.order.status },
+          { label: "ETA", value: `${data.order.estimatedWaitMinutes} mins` },
+        ],
+        metaLines: [
+          { label: "Processed at", value: formatDateTime(data.order.createdAt) },
+          { label: "Orders ahead", value: data.order.ordersAhead },
+          { label: "Payment status", value: data.order.paymentStatus },
+        ],
+      });
+      setPaymentPhase("success");
       setCart({});
     } catch (err) {
+      setPaymentPhase("idle");
       setError(err.response?.data?.message || "Could not place order");
     } finally {
       setPlacing(false);
@@ -68,6 +101,32 @@ export default function DiningPage() {
 
   return (
     <Shell title="Smart Dining">
+      {paymentPhase === "processing" ? (
+        <PaymentGateway
+          title="Processing your dining payment"
+          subtitle="Please wait while we verify the cart and reserve your pickup token."
+          amount={total}
+          payeeLabel="Merchant"
+          payeeValue="Campus Dining Services"
+          referenceLabel="Cart items"
+          referenceValue={`${cartItems.length} item(s)`}
+        />
+      ) : null}
+
+      {paymentPhase === "success" && receipt ? (
+        <PaymentReceipt
+          heading={receipt.heading}
+          amount={receipt.amount}
+          transactionId={receipt.transactionId}
+          paymentFor={receipt.paymentFor}
+          receiptLines={receipt.receiptLines}
+          metaLines={receipt.metaLines}
+          email={user?.email}
+          doneLabel="Start another order"
+          onDone={() => setPaymentPhase("idle")}
+        />
+      ) : null}
+
       <div className="mobile-note">PWA-ready, mobile-first ordering for faster pickup.</div>
       <div className="two-column">
         <section className="panel">
@@ -119,7 +178,7 @@ export default function DiningPage() {
           </div>
           {error ? <div className="error-banner">{error}</div> : null}
           <button className="primary-btn" onClick={handleOrder} disabled={placing}>
-            {placing ? "Simulating payment..." : "Pay & Place Order"}
+            {placing ? "Opening gateway..." : "Pay & Place Order"}
           </button>
 
           {latestOrder ? (

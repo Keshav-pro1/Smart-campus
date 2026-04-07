@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
 import api from "../api";
+import PaymentGateway from "../components/PaymentGateway";
+import PaymentReceipt from "../components/PaymentReceipt";
 import Shell from "../components/Shell";
 import StatusBadge from "../components/StatusBadge";
+import { useAuth } from "../context/AuthContext";
+
+const PRINT_RATE = 7;
 
 export default function PrintPage() {
+  const { user } = useAuth();
   const [file, setFile] = useState(null);
   const [copies, setCopies] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [jobs, setJobs] = useState([]);
   const [printers, setPrinters] = useState([]);
+  const [paymentPhase, setPaymentPhase] = useState("idle");
+  const [receipt, setReceipt] = useState(null);
 
   const loadData = async () => {
     const [jobsResponse, printerResponse] = await Promise.all([
@@ -26,6 +34,14 @@ export default function PrintPage() {
     return () => clearInterval(timer);
   }, []);
 
+  const amount = copies * PRINT_RATE;
+
+  const formatDateTime = (value) =>
+    new Intl.DateTimeFormat("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(value);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!file) {
@@ -35,20 +51,41 @@ export default function PrintPage() {
 
     setSubmitting(true);
     setError("");
+    setPaymentPhase("processing");
 
     const payload = new FormData();
     payload.append("document", file);
     payload.append("copies", copies);
 
     try {
-      await api.post("/print/jobs", payload, {
+      await new Promise((resolve) => setTimeout(resolve, 2400));
+      const { data } = await api.post("/print/jobs", payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      setReceipt({
+        heading: "Print receipt generated",
+        amount,
+        transactionId: `TXN-PRT-${Date.now().toString().slice(-8)}`,
+        paymentFor: `Smart Printing for ${file.name}`,
+        receiptLines: [
+          { label: "Print token", value: data.job.token },
+          { label: "File", value: data.job.fileName },
+          { label: "Copies", value: data.job.copies },
+          { label: "Status", value: data.job.displayStatus },
+        ],
+        metaLines: [
+          { label: "Processed at", value: formatDateTime(data.job.createdAt) },
+          { label: "Assigned printer", value: data.job.printerId || "Waiting" },
+          { label: "Payment status", value: data.job.paymentStatus },
+        ],
+      });
+      setPaymentPhase("success");
       setFile(null);
       setCopies(1);
       event.target.reset();
       await loadData();
     } catch (err) {
+      setPaymentPhase("idle");
       setError(err.response?.data?.message || "Unable to submit print job");
     } finally {
       setSubmitting(false);
@@ -57,10 +94,36 @@ export default function PrintPage() {
 
   return (
     <Shell title="Smart Printing">
+      {paymentPhase === "processing" ? (
+        <PaymentGateway
+          title="Processing your print payment"
+          subtitle="The gateway is validating the PDF and reserving the next print token."
+          amount={amount}
+          payeeLabel="Merchant"
+          payeeValue="Campus Printing Hub"
+          referenceLabel="Document"
+          referenceValue={file?.name || "Pending file"}
+        />
+      ) : null}
+
+      {paymentPhase === "success" && receipt ? (
+        <PaymentReceipt
+          heading={receipt.heading}
+          amount={receipt.amount}
+          transactionId={receipt.transactionId}
+          paymentFor={receipt.paymentFor}
+          receiptLines={receipt.receiptLines}
+          metaLines={receipt.metaLines}
+          email={user?.email}
+          doneLabel="Submit another print"
+          onDone={() => setPaymentPhase("idle")}
+        />
+      ) : null}
+
       <div className="two-column">
         <section className="panel">
           <h3>Upload PDF</h3>
-          <p className="muted">Payment is mocked. Successful checkout immediately creates a print token.</p>
+          <p className="muted">Payment is mocked at Rs. {PRINT_RATE} per copy. Successful checkout creates a print token.</p>
           <form className="form-grid" onSubmit={handleSubmit}>
             <label>
               PDF file
@@ -83,7 +146,7 @@ export default function PrintPage() {
             ) : null}
             {error ? <div className="error-banner">{error}</div> : null}
             <button className="primary-btn" type="submit" disabled={submitting}>
-              {submitting ? "Processing payment..." : "Pay & Print"}
+              {submitting ? "Opening gateway..." : `Pay Rs. ${amount} & Print`}
             </button>
           </form>
         </section>

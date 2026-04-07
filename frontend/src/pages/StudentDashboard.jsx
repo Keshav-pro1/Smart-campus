@@ -26,7 +26,7 @@ export default function StudentDashboard() {
         <div>
           <p className="eyebrow">Everything in one place</p>
           <h2>Campus services designed for quick student flow</h2>
-          <p className="muted">
+          <p className="muted" >
             Submit documents, skip dining queues, and track every token from your phone.
           </p>
         </div>

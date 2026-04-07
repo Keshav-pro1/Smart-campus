@@ -17,11 +17,11 @@ export default function AdminDashboard() {
   }, []);
 
   if (!overview) {
-    return <Shell title="Admin Dashboard">Loading admin dashboard...</Shell>;
+    return <Shell title="Printer Dashboard">Loading printer dashboard...</Shell>;
   }
 
   return (
-    <Shell title="Admin Dashboard">
+    <Shell title="Printer Dashboard">
       <section className="stats-grid">
         <div className="stat-card">
           <span>Total print jobs</span>
