@@ -1,104 +1,141 @@
-# Smart Campus Solution
+<div align="center">
+  <h1>🎓 Smart Campus Solution</h1>
+  <p><strong>A full-stack prototype modernizing campus life with smart printing, dining, and role-based access control.</strong></p>
 
-Complete full-stack prototype covering:
+  <p>
+    <img src="https://img.shields.io/badge/Frontend-React%20%7C%20Vite-blue?style=for-the-badge&logo=react" alt="Frontend" />
+    <img src="https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-success?style=for-the-badge&logo=nodedotjs" alt="Backend" />
+    <img src="https://img.shields.io/badge/Auth-JWT-orange?style=for-the-badge&logo=jsonwebtokens" alt="Auth" />
+    <img src="https://img.shields.io/badge/Architecture-PWA--Style-purple?style=for-the-badge" alt="PWA" />
+  </p>
+</div>
 
-- Smart Printing System
-- Smart Campus Dining (PWA-style frontend)
-- JWT authentication with `student`, `admin`, and `vendor` roles
+---
 
-## Folder Structure
+## 🌟 Overview
+
+The **Smart Campus Solution** is a conceptual full-stack prototype designed to digitize and streamline essential university services. It offers a **Progressive Web App (PWA) style frontend** and a robust backend, enabling students, administrators, and campus vendors to interact seamlessly within a unified ecosystem.
+
+## ✨ Key Features
+
+- **🖨️ Smart Printing System:** Upload documents securely, customize print settings (copies, format), process mock payments, and track the real-time queue status (`Queued` ➡️ `Printing` ➡️ `Ready`).
+- **🍔 Campus Dining Kiosk:** Browse rich digital menus, customize orders, process transactions, and monitor live estimated wait times and queue positions.
+- **🔐 Role-Based Authentication:** Secure JWT-based access with tailored dashboards for three distinct roles:
+  - 🎓 **Student:** Access services, place orders, and track print jobs.
+  - 🏪 **Vendor:** Manage live order queues and update dining requests.
+  - 🛡️ **Admin:** Oversee system operations and campus logs.
+
+---
+
+## 🛠️ Tech Stack & Architecture
+
+### Frontend (Client)
+- **Framework:** React.js powered by Vite
+- **Styling:** Custom CSS (`index.css`)
+- **State Management:** React Context API (`AuthContext`)
+- **PWA Features:** Web App Manifest (`manifest.webmanifest`), Service Worker (`sw.js`)
+
+### Backend (API)
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Authentication:** JSON Web Tokens (JWT)
+- **Data Layer:** In-memory transient storage (for prototyping ease)
+
+---
+
+## 📁 Repository Structure
 
 ```text
 smart-campus-solution/
-  backend/
-    package.json
-    uploads/
-    src/
-      data.js
-      server.js
-      middleware/
-        auth.js
-      routes/
-        auth.js
-        print.js
-        dining.js
-        dashboard.js
-      services/
-        simulators.js
-  frontend/
-    package.json
-    vite.config.js
-    index.html
-    public/
-      manifest.webmanifest
-      sw.js
-    src/
-      api.js
-      App.jsx
-      index.css
-      main.jsx
-      context/
-        AuthContext.jsx
-      components/
-        ProtectedRoute.jsx
-        Shell.jsx
-        StatusBadge.jsx
-      pages/
-        AuthPage.jsx
-        StudentDashboard.jsx
-        PrintPage.jsx
-        DiningPage.jsx
-        StatusPage.jsx
-        AdminDashboard.jsx
-        VendorDashboard.jsx
+├── backend/                  # Node/Express API Server
+│   ├── src/
+│   │   ├── middleware/       # JWT Auth verification
+│   │   ├── routes/           # API Endpoints (auth, print, dining, dashboard)
+│   │   ├── services/         # Business logic and simulators
+│   │   ├── data.js           # In-memory database models
+│   │   └── server.js         # Entry point (localhost:5000)
+│   ├── uploads/              # Transient file storage for print jobs
+│   └── package.json
+│
+└── frontend/                 # React/Vite PWA Client
+    ├── public/
+    │   ├── manifest.webmanifest
+    │   └── sw.js             # Service Worker
+    ├── src/
+    │   ├── api.js            # Axios/Fetch API interceptors
+    │   ├── context/          # Global Auth context
+    │   ├── components/       # Reusable UI (Shell, StatusBadge, ProtectedRoutes)
+    │   ├── pages/            # Role-specific Views
+    │   ├── App.jsx           # Routing definition
+    │   ├── main.jsx          # DOM Entry
+    │   └── index.css         # Global Styles & Theming
+    ├── vite.config.js
+    └── package.json
 ```
 
-## Setup Instructions
+---
 
-### Backend
+## 🚀 Getting Started
+
+Follow these steps to run the application locally on your machine.
+
+### 1. Start the Backend API
 
 ```bash
 cd smart-campus-solution/backend
 npm install
 npm run dev
 ```
+> **Note:** The backend API will start on **`http://localhost:5000`**.
 
-Runs on `http://localhost:5000`.
+### 2. Start the Frontend Client
 
-### Frontend
+Open a native new terminal window:
 
 ```bash
 cd smart-campus-solution/frontend
 npm install
 npm run dev
 ```
+> **Note:** The frontend application will start on **`http://localhost:5173`**.
 
-Runs on `http://localhost:5173`.
+---
 
-## Sample Test Data
+## 🧪 Testing the Prototype
 
-Demo accounts:
+The system is pre-seeded with sample data to help you test different role-based workflows immediately.
 
-- Student: `student@campus.local` / `student123`
-- Admin: `admin@campus.local` / `admin123`
-- Vendor: `vendor@campus.local` / `vendor123`
+### 👥 Demo Accounts
 
-Printing test:
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Student** | `student@campus.local` | `student123` |
+| **Vendor** | `vendor@campus.local` | `vendor123` |
+| **Admin** | `admin@campus.local` | `admin123` |
 
-1. Log in as student.
-2. Upload any PDF.
-3. Set copies and click `Pay & Print`.
-4. Watch status move through `Queued`, `Printing`, and `Ready`.
+### 🖨️ Workflow 1: Smart Printing
+1. Go to `http://localhost:5173` and log in as a **Student**.
+2. Navigate to the **Print** module.
+3. Upload any test PDF file.
+4. Configure your print job (e.g., set the number of copies) and click **"Pay & Print"**.
+5. Observe the live status tracker as your document moves from `Queued` to `Printing` and finally to `Ready`.
 
-Dining test:
+### 🍔 Workflow 2: Campus Dining
+1. Log in as a **Student**.
+2. Open the **Dining** menu, select your preferred items, and place an order.
+3. Check your position in the live queue and the estimated wait time on your **Status Page**.
+4. Open an incognito window, log in as a **Vendor**, and update the order status to simulate kitchen progress. Watch the student's status update dynamically!
 
-1. Log in as student.
-2. Add menu items and place an order.
-3. Check queue position and estimated wait on the status page.
-4. Log in as vendor in a separate session and update the order status.
+---
 
-## Notes
+## ⚠️ Important Notes
 
-- Prototype uses in-memory storage for simplicity.
-- Restarting backend resets new signups, print jobs, and orders.
-- Payments are mocked.
+- **Volatile Storage:** This prototype uses **in-memory data structures**. Any simulated data (new sign-ups, print queues, dining orders) will reset if the Node backend is restarted. 
+- **Mock Payments:** The payment gateway is purely simulated and does not connect to any real financial APIs.
+- **File Uploads:** Print documents are stored locally in the `/backend/uploads` directory.
+
+---
+
+<div align="center">
+  <i>Built to optimize campus life with clean, modern web technologies.</i>
+</div>
