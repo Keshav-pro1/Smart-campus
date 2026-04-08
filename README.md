@@ -14,7 +14,7 @@
 
 ## 🌟 Overview
 
-The **Smart Campus Solution** is a conceptual full-stack prototype designed to digitize and streamline essential university services. It offers a **Progressive Web App (PWA) style frontend** and a robust backend, enabling students, administrators, and campus vendors to interact seamlessly within a unified ecosystem.
+The **Smart Campus Solution** is a full-stack digital platform that streamlines essential university services through a unified ecosystem, enabling seamless interaction between students, administrators, and vendors via a modern Progressive Web App (PWA).
 
 ## ✨ Key Features
 
