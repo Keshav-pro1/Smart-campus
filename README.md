@@ -43,7 +43,7 @@ The **Smart Campus Solution** is a full-stack digital platform that streamlines 
 
 ---
 
-## 📁 Repository Structure
+## 📁  Repository Structure
 
 ```text
 smart-campus-solution/
